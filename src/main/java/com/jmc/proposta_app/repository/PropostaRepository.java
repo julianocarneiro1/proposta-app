@@ -1,4 +1,4 @@
-package com.jmc.proposta_app.controller.repository;
+package com.jmc.proposta_app.repository;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
