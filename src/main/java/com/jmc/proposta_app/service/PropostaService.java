@@ -18,15 +18,15 @@ public class PropostaService {
 
 	private PropostaRepository propostaRepository;
 
-	private NotificacaoService notificacaoService;
+	private NotificacaoRabbitService notificacaoRabbitService;
 
 	private String exchange;
 
 	public PropostaService(PropostaRepository propostaRepository,
-						   NotificacaoService notificacaoService,
+						   NotificacaoRabbitService notificacaoRabbitService,
 						   @Value("${rabbitmq.propostapendente.exchange}") String exchange) {
 		this.propostaRepository = propostaRepository;
-		this.notificacaoService = notificacaoService;
+		this.notificacaoRabbitService = notificacaoRabbitService;
 		this.exchange = exchange;
 	}
 
@@ -41,7 +41,7 @@ public class PropostaService {
 
 	private void notificarRabbitMQ(Proposta proposta) {
 		try {
-			notificacaoService.notificar(proposta, exchange);
+			notificacaoRabbitService.notificar(proposta, exchange);
 		} catch (RuntimeException ex) {
 			proposta.setIntegrada(false);
 			propostaRepository.save(proposta);
