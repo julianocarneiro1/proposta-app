@@ -14,11 +14,11 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class PropostaSemIntegracao {
 
-    private PropostaRepository propostaRepository;
+    private final PropostaRepository propostaRepository;
 
-    private NotificacaoRabbitService notificacaoRabbitService;
+    private final NotificacaoRabbitService notificacaoRabbitService;
 
-    private String exchange;
+    private final String exchange;
 
     private final Logger logger = LoggerFactory.getLogger(PropostaSemIntegracao.class);
 
