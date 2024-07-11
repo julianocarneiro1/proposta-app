@@ -24,6 +24,9 @@ public class RabbitMQConfiguration {
     @Value("${rabbitmq.propostaconcluida.exchange}")
     private String exchangePropostaConcluida;
 
+    @Value("${rabbitmq.propostapendente-notificacao-dlq.exchange}")
+    private String exchangePropostaPendenteNotificacaoDlq;
+
     @Bean
     public Queue criarFilaPropostaPendenteMsAnaliseCredito() {
         return QueueBuilder.durable("proposta-pendente.ms-analise-credito")
@@ -33,7 +36,9 @@ public class RabbitMQConfiguration {
 
     @Bean
     public Queue criarFilaPropostaPendenteMsNotificacao() {
-        return QueueBuilder.durable("proposta-pendente.ms-notificacao").build();
+        return QueueBuilder.durable("proposta-pendente.ms-notificacao")
+                .deadLetterExchange(exchangePropostaPendenteNotificacaoDlq)
+                .build();
     }
 
     @Bean
@@ -50,6 +55,12 @@ public class RabbitMQConfiguration {
     public Queue criarFilaPropostaPendenteAnaliseCreditoDlq() {
         return QueueBuilder.durable("proposta-pendente.ms-analise-credito.dlq").build();
     }
+
+    @Bean
+    public Queue criarFilaPropostaPendenteNotificacaoDlq() {
+        return QueueBuilder.durable("proposta-pendente.ms-notificacao.dlq").build();
+    }
+
 
     @Bean
     public RabbitAdmin criarRabbitAdmin(ConnectionFactory connectionFactory) {
@@ -69,6 +80,11 @@ public class RabbitMQConfiguration {
     @Bean
     public FanoutExchange criarFanoutExchangePropostaPendenteAnaliseCreditoDlq() {
         return ExchangeBuilder.fanoutExchange(exchangePropostaPendenteAnaliseCreditoDlq).build();
+    }
+
+    @Bean
+    public FanoutExchange criarFanoutExchangePropostaPendenteNotificacaoDlq() {
+        return ExchangeBuilder.fanoutExchange(exchangePropostaPendenteNotificacaoDlq).build();
     }
 
     @Bean
@@ -93,6 +109,12 @@ public class RabbitMQConfiguration {
     public Binding criarBindingPropostaPendenteAnaliseCreditoDlq() {
         return BindingBuilder.bind(criarFilaPropostaPendenteAnaliseCreditoDlq())
                 .to(criarFanoutExchangePropostaPendenteAnaliseCreditoDlq());
+    }
+
+    @Bean
+    public Binding criarBindingPropostaPendenteNotificacaoDlq() {
+        return BindingBuilder.bind(criarFilaPropostaPendenteNotificacaoDlq())
+                .to(criarFanoutExchangePropostaPendenteNotificacaoDlq());
     }
 
     @Bean
