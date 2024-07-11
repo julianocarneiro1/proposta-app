@@ -18,12 +18,17 @@ public class RabbitMQConfiguration {
     @Value("${rabbitmq.propostapendente.exchange}")
     private String exchangePropostaPendente;
 
+    @Value("${rabbitmq.propostapendente-analisecredito-dlq.exchange}")
+    private String exchangePropostaPendenteAnaliseCreditoDlq;
+
     @Value("${rabbitmq.propostaconcluida.exchange}")
     private String exchangePropostaConcluida;
 
     @Bean
     public Queue criarFilaPropostaPendenteMsAnaliseCredito() {
-        return QueueBuilder.durable("proposta-pendente.ms-analise-credito").build();
+        return QueueBuilder.durable("proposta-pendente.ms-analise-credito")
+                .deadLetterExchange(exchangePropostaPendenteAnaliseCreditoDlq)
+                .build();
     }
 
     @Bean
@@ -42,6 +47,11 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
+    public Queue criarFilaPropostaPendenteAnaliseCreditoDlq() {
+        return QueueBuilder.durable("proposta-pendente.ms-analise-credito.dlq").build();
+    }
+
+    @Bean
     public RabbitAdmin criarRabbitAdmin(ConnectionFactory connectionFactory) {
         return new RabbitAdmin(connectionFactory);
     }
@@ -54,6 +64,11 @@ public class RabbitMQConfiguration {
     @Bean
     public FanoutExchange criarFanoutExchangePropostaPendente() {
         return ExchangeBuilder.fanoutExchange(exchangePropostaPendente).build();
+    }
+
+    @Bean
+    public FanoutExchange criarFanoutExchangePropostaPendenteAnaliseCreditoDlq() {
+        return ExchangeBuilder.fanoutExchange(exchangePropostaPendenteAnaliseCreditoDlq).build();
     }
 
     @Bean
@@ -72,6 +87,12 @@ public class RabbitMQConfiguration {
     public Binding criarBindingPropostaPendenteMsNotificacao() {
         return BindingBuilder.bind(criarFilaPropostaPendenteMsNotificacao())
                 .to(criarFanoutExchangePropostaPendente());
+    }
+
+    @Bean
+    public Binding criarBindingPropostaPendenteAnaliseCreditoDlq() {
+        return BindingBuilder.bind(criarFilaPropostaPendenteAnaliseCreditoDlq())
+                .to(criarFanoutExchangePropostaPendenteAnaliseCreditoDlq());
     }
 
     @Bean
