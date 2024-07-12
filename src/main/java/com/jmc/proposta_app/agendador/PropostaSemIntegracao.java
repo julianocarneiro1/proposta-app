@@ -6,8 +6,11 @@ import com.jmc.proposta_app.service.NotificacaoRabbitService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.TimeUnit;
 
@@ -35,15 +38,10 @@ public class PropostaSemIntegracao {
         propostaRepository.findAllByIntegradaIsFalse().forEach(proposta -> {
             try {
                 notificacaoRabbitService.notificar(proposta, exchange);
-                atualizarProposta(proposta);
+                propostaRepository.atualizarStatusIntegrada(proposta.getId(), true);
             } catch (RuntimeException ex) {
                 logger.error(ex.getMessage());
             }
         });
-    }
-
-    private void atualizarProposta(Proposta proposta) {
-        proposta.setIntegrada(true);
-        propostaRepository.save(proposta);
     }
 }
